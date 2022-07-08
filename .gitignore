@@ -13,3 +13,4 @@ testdata/
 
 #
 *.gesichter
+.vscode/

@@ -8,7 +8,7 @@
 """
 
 import setuptools
-from src.llv import version
+from llv import version
 
 with open("readme.md", "r") as fh:
     long_description = fh.read()
@@ -22,7 +22,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/think-biq/LLV",
-    package_dir = {'llv': 'src/llv'},
+    package_dir = {'llv': 'llv'},
     packages=['llv'],
     classifiers=[
         "Programming Language :: Python :: 3",
