@@ -20,6 +20,7 @@ import math
 from .gesicht import FaceFrame, remap
 from .buchse import Buchse
 from .__init__ import version as get_version
+from alfred import logger
 
 
 def tween(a, b, frames):
@@ -101,14 +102,14 @@ def playback(host, port, filepath, fps, loop = True):
     sleep_time = 1/fps
 
     buchse = Buchse(host, port, as_server = False)
-    print(f'Establish connection ({buchse.connection_info}) ...')
+    logger.info(f'Establish connection ({buchse.connection_info}) ...')
 
     frame_index = -1
     frame_count = -1
     for frame_package in read_frames(filepath, loop=loop):
         frame_data, frame_index, frame_count, version = frame_package
         if 0 == frame_index:
-            print(f'Start sending {frame_count} frames of version {version} @{fps}fps ...')
+            logger.info(f'Start sending {frame_count} frames of version {version} @{fps}fps ...')
 
         frame = FaceFrame.from_raw(frame_data, len(frame_data))
 

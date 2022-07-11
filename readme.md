@@ -17,7 +17,7 @@ Checkout [this video](https://www.youtube.com/watch?v=RTwibwX4U_s), on how to se
 
 #### Record
 
-Listens for 256 incoming frames on all interfaces and standard port *11111* and writes the recording to a file named *dao.gesichter*.
+Listens for 256 incoming frames on all interfaces and standard port *11111* and writes the recording to a file named *dao.gesichter*.ww
 
 ```bash
 python llv.py record --frames 256 --output dao.gesichter
