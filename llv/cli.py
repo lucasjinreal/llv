@@ -17,8 +17,8 @@ import os
 import gzip
 import csv
 import math
-from .gesicht import FaceFrame, remap
-from .buchse import Buchse
+from .faceframe import FaceFrame, remap
+from .socketconn import Buchse
 from .__init__ import version as get_version
 from alfred import logger
 
