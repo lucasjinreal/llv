@@ -77,14 +77,16 @@ class ColladaModel:
 
     def __load_keyframes(self, animation_node):
         self.keyframes = []
+        print(animation_node[0].sourceById)
+        print(animation_node[0].id)
         keyframes_times = np.squeeze(
-            animation_node[0].sourceById.get(animation_node[0].id + "-input").data
+            animation_node[0].sourceById.get(animation_node[0].id.replace('anim', 'Matrix-animation-input')).data
         ).tolist()
         for index, time in enumerate(keyframes_times):
             joint_dict = dict()
             for animation in animation_node:
                 joint_dict[animation.id] = (
-                    animation.sourceById.get(animation.id + "-output")
+                    animation.sourceById.get(animation.id.replace('anim', 'Matrix-animation-output-transform'))
                     .data[index * 16 : (index + 1) * 16]
                     .reshape((4, 4))
                 )
