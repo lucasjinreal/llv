@@ -30,7 +30,8 @@ handshake = json.dumps(
     {
         'HANDSHAKE': {
             'name': 'PythonDemo',  # will be displayed in the app
-            'rig': 'UE4',  # Options: 'UE4', 'Mixamo'
+            # 'rig': 'UE4',  # Options: 'UE4', 'Mixamo'
+            'rig': 'Metahuman',  # Options: 'UE4', 'Mixamo'
             'mode': 'Desktop',  # Options: 'Room', 'Desktop', 'Portrait', 'RoomBodyOnly', 'PortraitBodyOnly'
             'mirror': 'YES',  # Options: 'YES', 'NO'
             'syncFPS': 60, # App smooths processed frames to constant FPS.  0 for async mode (will still smooth joints between processed frames)
@@ -47,7 +48,7 @@ server_socket.bind(('0.0.0.0', PORT_NUM))
 
 save_f = open('data.json', 'w')
 frames_content = []
-max_frames = 1200
+max_frames = 3200
 i = 0
 
 while i < max_frames:
@@ -64,10 +65,10 @@ while i < max_frames:
     else:
         # message holds pose data, do what you want with it
         print(json.dumps(decoded_message))
-        frames_content.append(json.dumps(decoded_message))
+        frames_content.append(decoded_message)
         i += 1
 
-json.dump(frames_content, save_f)
+json.dump(frames_content, save_f, ensure_ascii=False)
 save_f.close()
 print('finished.')
 

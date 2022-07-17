@@ -55,4 +55,9 @@ class SocketConn:
         return bytes_sent
 
     def send_json(self, data):
-        self.s.sendall(bytes(str(data), encoding="utf-8"))
+        # self.s.sendall(bytes(str(data), encoding="utf-8"))
+        self.s.sendall(str(data).encode('utf-8'))
+    
+    def send_json_encoded(self, data):
+        # self.s.sendall(bytes(str(data), encoding="utf-8"))
+        self.s.sendall(data)
