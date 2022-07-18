@@ -9,12 +9,13 @@
 
 import socket
 
-class Buchse():
+
+class SocketConn:
     """
     UDP connection utility.
     """
-    
-    def __init__(self, host = '', port = 11111, as_server = False):
+
+    def __init__(self, host="", port=11111, as_server=False):
         """
         Create an instance of Buchse as either client or server.
         """
@@ -28,28 +29,22 @@ class Buchse():
                 self.s.bind((host, port))
             else:
                 self.s.connect((host, port))
-        except socket.error as e:        
-            raise Exception(f'Could not connect to server. ({e})')
+        except socket.error as e:
+            raise Exception(f"Could not connect to server. ({e})")
 
         self.is_valid = True
-        self.connection_info = {
-            "remote": (host, port),
-            "local": self.s.getsockname()
-        }
-
+        self.connection_info = {"remote": (host, port), "local": self.s.getsockname()}
 
     def __del__(self):
         if self.is_valid:
             self.s.close()
 
-
-    def horch(self, size):
+    def receive(self, size):
         data, connection = self.s.recvfrom(size)
         data_size = len(data)
         return data, data_size
 
-
-    def sprech(self, data, data_size):
+    def send(self, data, data_size):
         bytes_sent = 0
         while bytes_sent < data_size:
             remaining_data = data[bytes_sent:]
@@ -58,3 +53,11 @@ class Buchse():
                 break
             bytes_sent += last_sent
         return bytes_sent
+
+    def send_json(self, data):
+        # self.s.sendall(bytes(str(data), encoding="utf-8"))
+        self.s.sendall(str(data).encode('utf-8'))
+    
+    def send_json_encoded(self, data):
+        # self.s.sendall(bytes(str(data), encoding="utf-8"))
+        self.s.sendall(data)
