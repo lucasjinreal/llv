@@ -1,15 +1,17 @@
-
-
-'''
+"""
 Pose frame currently only support json data format
 
 read animation from mixamo fbx converted to json
 
 then sending to UE, remap to metahuman
 
-'''
+"""
 
 
+import base64
+import json
+import struct
+from loguru import logger
 import numpy as np
 import os
 
@@ -22,85 +24,80 @@ def load_from_json():
     pass
 
 
-
 class PoseFrame:
 
-    def __init__(self) -> None:
-        pass
+    """
+    PoseFrame data must be encoded to binary to send to livelink
+    but what is the binary format does livelink consume?
 
-        VERSION = 1
+    """
 
-        # Min and Max packet sizes in bytes.
-        # See https://github.com/EpicGames/UnrealEngine/blob/2bf1a5b83a7076a0fd275887b373f8ec9e99d431/Engine/Plugins/Runtime/AR/AppleAR/AppleARKitFaceSupport/Source/AppleARKitFaceSupport/Private/AppleARKitLiveLinkSource.cpp#L256
-        PACKET_MIN_SIZE = 264
-        PACKET_MAX_SIZE = 774
+    VERSION = 1
 
-        # Blendshape names:
-        # See https://docs.unrealengine.com/en-US/API/Runtime/AugmentedReality/EARFaceBlendShape/index.html
-        FACE_BLENDSHAPE_NAMES = [
-            "EyeBlinkLeft",
-            "EyeLookDownLeft",
-            "EyeLookInLeft",
-            "EyeLookOutLeft",
-            "EyeLookUpLeft",
-            "EyeSquintLeft",
-            "EyeWideLeft",
-            "EyeBlinkRight",
-            "EyeLookDownRight",
-            "EyeLookInRight",
-            "EyeLookOutRight",
-            "EyeLookUpRight",
-            "EyeSquintRight",
-            "EyeWideRight",
-            "JawForward",
-            "JawLeft",
-            "JawRight",
-            "JawOpen",
-            "MouthClose",
-            "MouthFunnel",
-            "MouthPucker",
-            "MouthLeft",
-            "MouthRight",
-            "MouthSmileLeft",
-            "MouthSmileRight",
-            "MouthFrownLeft",
-            "MouthFrownRight",
-            "MouthDimpleLeft",
-            "MouthDimpleRight",
-            "MouthStretchLeft",
-            "MouthStretchRight",
-            "MouthRollLower",
-            "MouthRollUpper",
-            "MouthShrugLower",
-            "MouthShrugUpper",
-            "MouthPressLeft",
-            "MouthPressRight",
-            "MouthLowerDownLeft",
-            "MouthLowerDownRight",
-            "MouthUpperUpLeft",
-            "MouthUpperUpRight",
-            "BrowDownLeft",
-            "BrowDownRight",
-            "BrowInnerUp",
-            "BrowOuterUpLeft",
-            "BrowOuterUpRight",
-            "CheekPuff",
-            "CheekSquintLeft",
-            "CheekSquintRight",
-            "NoseSneerLeft",
-            "NoseSneerRight",
-            "TongueOut",
-            "HeadYaw",
-            "HeadPitch",
-            "HeadRoll",
-            "LeftEyeYaw",
-            "LeftEyePitch",
-            "LeftEyeRoll",
-            "RightEyeYaw",
-            "RightEyePitch",
-            "RightEyeRoll",
-        ]
-        FACE_BLENDSHAPE_COUNT = len(FACE_BLENDSHAPE_NAMES)
+    # Min and Max packet sizes in bytes.
+    # See https://github.com/EpicGames/UnrealEngine/blob/2bf1a5b83a7076a0fd275887b373f8ec9e99d431/Engine/Plugins/Runtime/AR/AppleAR/AppleARKitFaceSupport/Source/AppleARKitFaceSupport/Private/AppleARKitLiveLinkSource.cpp#L256
+    PACKET_MIN_SIZE = 264
+    # PACKET_MAX_SIZE = 774
+    PACKET_MAX_SIZE = 9000
+
+    # Blendshape names:
+    # See https://docs.unrealengine.com/en-US/API/Runtime/AugmentedReality/EARFaceBlendShape/index.html
+    MIXAMO_SKL_NAMES = [
+        "mixamorig_Hips",
+        "mixamorig_Spine",
+        "mixamorig_Spine1",
+        "mixamorig_Spine2",
+        "mixamorig_Neck",
+        "mixamorig_Head",
+        "mixamorig_LeftShoulder",
+        "mixamorig_LeftArm",
+        "mixamorig_LeftForeArm",
+        "mixamorig_LeftHand",
+        "mixamorig_LeftHandThumb1",
+        "mixamorig_LeftHandThumb2",
+        "mixamorig_LeftHandThumb3",
+        "mixamorig_LeftHandIndex1",
+        "mixamorig_LeftHandIndex2",
+        "mixamorig_LeftHandIndex3",
+        "mixamorig_LeftHandMiddle1",
+        "mixamorig_LeftHandMiddle2",
+        "mixamorig_LeftHandMiddle3",
+        "mixamorig_LeftHandRing1",
+        "mixamorig_LeftHandRing2",
+        "mixamorig_LeftHandRing3",
+        "mixamorig_LeftHandPinky1",
+        "mixamorig_LeftHandPinky2",
+        "mixamorig_LeftHandPinky3",
+        "mixamorig_RightShoulder",
+        "mixamorig_RightArm",
+        "mixamorig_RightForeArm",
+        "mixamorig_RightHand",
+        "mixamorig_RightHandThumb1",
+        "mixamorig_RightHandThumb2",
+        "mixamorig_RightHandThumb3",
+        "mixamorig_RightHandIndex1",
+        "mixamorig_RightHandIndex2",
+        "mixamorig_RightHandIndex3",
+        "mixamorig_RightHandMiddle1",
+        "mixamorig_RightHandMiddle2",
+        "mixamorig_RightHandMiddle3",
+        "mixamorig_RightHandRing1",
+        "mixamorig_RightHandRing2",
+        "mixamorig_RightHandRing3",
+        "mixamorig_RightHandPinky1",
+        "mixamorig_RightHandPinky2",
+        "mixamorig_RightHandPinky3",
+        "mixamorig_LeftUpLeg",
+        "mixamorig_LeftLeg",
+        "mixamorig_LeftFoot",
+        "mixamorig_LeftToeBase",
+        "mixamorig_RightUpLeg",
+        "mixamorig_RightLeg",
+        "mixamorig_RightFoot",
+        "mixamorig_RightToeBase",
+    ]
+    # 52 keypoints
+    FACE_BLENDSHAPE_COUNT = len(MIXAMO_SKL_NAMES)
 
     @staticmethod
     def from_default(frame_number=0, fps=60):
@@ -114,7 +111,7 @@ class PoseFrame:
             "denominator": 1,
         }
 
-        for name in FaceFrame.FACE_BLENDSHAPE_NAMES:
+        for name in PoseFrame.MIXAMO_SKL_NAMES:
             frame.blendshapes[name] = 0.0
         frame.blendshape_count = len(frame.blendshapes)
 
@@ -124,7 +121,7 @@ class PoseFrame:
 
     @staticmethod
     def from_json(frame_json):
-        frame = FaceFrame()
+        frame = PoseFrame()
 
         frame.version = frame_json["version"]
         frame.device_id = frame_json["device_id"]
@@ -141,13 +138,12 @@ class PoseFrame:
     @staticmethod
     def from_raw(data, data_size):
 
-        frame = FaceFrame()
+        frame = PoseFrame()
         frame.data = data
         frame.size = data_size
         frame.current_position = 0
 
         frame._deserialize()
-
         return frame
 
     def __init__(self):
@@ -155,9 +151,9 @@ class PoseFrame:
         self.size = 0
         self.current_position = 0
 
-        self.version = FaceFrame.VERSION
-        self.device_id = "DEADC0DE-1337-1337-1337-CAFEBABE"
-        self.subject_name = "LLV Default Device"
+        self.version = PoseFrame.VERSION
+        self.device_id = "DEADC0DE-1337-1337-1337-CAFEBABE-POSE"
+        self.subject_name = "LLV Default FUCK Device"
         self.frame_time = {
             "frame_number": 0,
             "sub_frame": 0,
@@ -168,14 +164,17 @@ class PoseFrame:
         self.blendshape_count = 0
         self.blendshapes = {}
 
+        self.sktl_count = 0
+        self.sktl_anim_trans = {}
+
     def _check_size(self):
-        if FaceFrame.PACKET_MIN_SIZE > self.size:
+        if PoseFrame.PACKET_MIN_SIZE > self.size:
             raise Exception(
-                f"Trying to read frame (size: {self.size}) smaller than min size of {FaceFrame.PACKET_MIN_SIZE} bytes!"
+                f"Trying to read frame (size: {self.size}) smaller than min size of {PoseFrame.PACKET_MIN_SIZE} bytes!"
             )
-        if FaceFrame.PACKET_MAX_SIZE < self.size:
+        if PoseFrame.PACKET_MAX_SIZE < self.size:
             raise Exception(
-                f"Trying to read frame (size: {self.size}) bigger than max size of {FaceFrame.PACKET_MAX_SIZE} bytes!"
+                f"Trying to read frame (size: {self.size}) bigger than max size of {PoseFrame.PACKET_MAX_SIZE} bytes!"
             )
 
     def _deserialize(self):
@@ -187,11 +186,14 @@ class PoseFrame:
         self.device_id = self._read_string()
         self.subject_name = self._read_string()
         self.frame_time = self._read_frametime()
+        logger.info(f'device: {self.device_id}, sub: {self.subject_name}')
+        self.sktl_count = self._read_uint8()
 
-        self.blendshape_count = self._read_uint8()
-        for blendshape_index in range(0, self.blendshape_count):
-            blendshape_name = FaceFrame.FACE_BLENDSHAPE_NAMES[blendshape_index]
-            self.blendshapes[blendshape_name] = self._read_float()
+        for blendshape_index in range(0, self.sktl_count):
+            # blendshape_name = PoseFrame.MIXAMO_SKL_NAMES[blendshape_index]
+            # self.blendshapes[blendshape_name] = self._read_float()
+            for i in range(16 + 4):
+                self._read_float()
         # logger.info(
         #     f"version: {self.version}, device: {self.device_id}, sub_name: {self.subject_name}, frame_time: {self.frame_time}"
         # )
@@ -203,7 +205,6 @@ class PoseFrame:
             )
             self.data = self.data[:-unused_padding]
             self.size = len(self.data)
-
         return self
 
     def _serialize(self):
@@ -215,11 +216,19 @@ class PoseFrame:
         self._write_string(self.device_id)
         self._write_string(self.subject_name)
         self._write_frametime(self.frame_time)
-
-        count = self.blendshape_count
+        
+        # maybe * 16?
+        count = self.sktl_count
         self._write_uint8(count)
-        for blendshape_name in self.blendshapes:
-            self._write_float(self.blendshapes[blendshape_name])
+        for tran in self.sktl_anim_trans:
+            print(tran)
+            # tran_flatten = np.hstack(tran).flatten().tolist()
+            # print(tran_flatten)
+            # self._write_float(tran_flatten)
+            for t in tran:
+                tt = t.flatten()
+                for ttt in tt:
+                    self._write_float(ttt)
 
         self.size = len(self.data)
 
@@ -232,6 +241,7 @@ class PoseFrame:
         frame_packet += struct.pack(">L", self.size)
         frame_packet += self.data
 
+        logger.info(f'size: {len(self.data)}')
         return frame_packet
 
     def equals(self, other):
