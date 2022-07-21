@@ -61,9 +61,7 @@ for fc in frames_content:
     # print(fc)
     # socket_conn.send_json(fc)
     print(type(fc))
-    pk = dict()
-    pk["HANDSHAKE"] = fc
-    fc_right_json = json.dumps(pk, ensure_ascii=False)
+    fc_right_json = json.dumps(fc, ensure_ascii=False)
     socket_conn.send_json_encoded(fc_right_json.encode("utf-8"))
     logger.info(f"Start sending frames of version {version} @{fps}fps ...")
     time.sleep(sleep_time)
