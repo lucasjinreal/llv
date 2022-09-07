@@ -46,7 +46,8 @@ show_my_ip()
 
 connections = {}
 
-socket_conn = SocketConn("127.0.0.1", port=8080)
+# socket_conn = SocketConn("127.0.0.1", port=8080)
+socket_conn = SocketConn("127.0.0.1", port=8081)
 # socket_conn = SocketConn("127.0.0.1", port=54321)
 socket_conn.send_json_encoded(json.dumps(handshake, ensure_ascii=False).encode("utf-8"))
 
