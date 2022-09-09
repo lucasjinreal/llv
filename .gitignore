@@ -16,3 +16,4 @@ testdata/
 .vscode/
 data/
 data.json
+*.bin
