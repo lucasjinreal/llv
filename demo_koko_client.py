@@ -8,7 +8,6 @@ import socket
 import json
 from pprint import pprint
 
-from sqlalchemy import true
 from llv.kokoframedata import KokoProps, KokoSuiteData, Pos, RotationQuat
 from llv.socketconn import SocketConn
 import time
