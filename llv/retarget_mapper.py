@@ -116,6 +116,8 @@ smpl_to_koko_map = {
     "R_Hand": "rightMiddleTip",
 }
 
+
+# actually this is directly MetaHuman's skeleton
 smpl_to_poseai_map = {
     "Pelvis": "hip",
     "L_Hip": "leftUpLeg",

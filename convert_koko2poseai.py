@@ -1,10 +1,10 @@
 '''
 convert Koko recorded data to PoseAI format
 '''
-from llv.retarget_mapper import smpl_to_poseai_map
+from llv.retarget_mapper import smpl_to_poseai_map, smpl_bone_index_map
 import json
 import os
-
+import time
 
 # for fc in frames_content:
 #     sc = fc['scene']
@@ -29,49 +29,73 @@ def construct_poseai_data(frames_content):
         one_koko_frame["PF"] = 0
         one_koko_frame["Rig"] = 'MetaHuman'
 
+        sc = fc['scene']
+        ac = sc['actors'][0]
+        bd = ac['body']
 
-        # add props
-        props = []
-        prop1 = KokoProps()
-        prop1.name = "camera"
-        prop1.id = 1
-        prop1.position = Pos(2.0, 3.0, 4.0)
-        prop1.rotation = RotationQuat(1.2, 3., 2., 4)
-        props.append(prop1.toJSON())
+        new_bd = dict()
+        for k,v in bd.items():
+            smpl_n = smpl_bone_index_map[int(k)]
+            koko_n = smpl_to_poseai_map[smpl_n]
+            new_bd[koko_n] = v
+        one_koko_frame['Body']['Rotations'] = new_bd
 
-        prop1 = KokoProps()
-        prop1.name = "light"
-        prop1.id = 2
-        prop1.position = Pos(2.0, 3.0, 4.0)
-        prop1.rotation = RotationQuat(1.2, 3., 2., 4)
-        props.append(prop1.toJSON())
+        one_koko_frame["Scalars"] = {
+            "VisTorso": 1,
+            "VisLegL": 0,
+            "VisLegR": 0,
+            "VisArmL": 0,
+            "VisArmR": 0,
+            "BodyHeight": 3.125,
+            "StableFoot": 0.0,
+            "ChestYaw": -0.059,
+            "StanceYaw": 0.0,
+            "HandZoneL": 5,
+            "HandZoneR": 3,
+            "IsCrouching": 0,
+            "ShrugL": 0.0,
+            "ShrugR": 0.0
+        }
 
-        # add actors
-        actors = []
-        actor = KokoSuiteData()
-        actor.name = "fuck suite actor"
-        actor.faceId = 1
-        actor.hasBody = True
-        actor.timestamp = fc["Timestamp"]
-
-        body = fc["Body"]
-        body_dict = dict()
-        if "Rotations" in body.keys():
-            actor.hasBody = True
-            for bn, bone_r in fc["Body"]["Rotations"].items():
-                if bn in retarget_poseai_koko.keys():
-                    bn = retarget_poseai_koko[bn]
-                    body_dict[bn] = {}
-                    body_dict[bn]['position'] = Pos(1.0, 2.0, 3,).toJSON()
-                    body_dict[bn]['rotation'] = RotationQuat(*bone_r).toJSON()
-        else:
-            actor.hasBody = False
-        actor.body = body_dict
-        actors.append(actor.toJSON())
-
-        one_koko_frame["scene"] = {}
-        one_koko_frame["scene"]["props"] = props
-        one_koko_frame["scene"]["actors"] = actors
+        one_koko_frame["Events"] = {
+            "Footstep": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "SidestepL": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "SidestepR": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "JumpCount": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "FeetSplit": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "ArmPump": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "ArmFlex": {
+            "Count": 0,
+            "Magnitude": 0.0
+            },
+            "ArmGestureL": {
+            "Count": 1,
+            "Current": 8
+            },
+            "ArmGestureR": {
+            "Count": 10,
+            "Current": 4
+            }
+        }
+        one_koko_frame['Timestamp'] = time.time()
         koko_data.append(one_koko_frame)
     return koko_data
 
