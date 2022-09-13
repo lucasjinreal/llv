@@ -35,8 +35,14 @@ handshake = {
     "HANDSHAKE": {
         "version": "1.2.5",
         "userName": "iPhone2Python",
-        "sessionUUID": "8EF5BA6A-A73E-419A-9BDC-7E18759C180C",
+        "UUID": "8EF5BA6A-A73E-419A-9BDC-7E18759C180C",
         "deviceName": "iPhone13,4",
+        "rig": "MetaHuman",
+        "name": "FUCKYOU LiveLink",
+        "mode": "Room",
+        "syncFPS": 13,
+        "useRootMotion": True,
+        "whoami": "YourMother",
     },
     "version": "1.2.5",
     "userName": "iPhone2Python"
@@ -53,7 +59,7 @@ socket_conn.send_json_encoded(json.dumps(handshake, ensure_ascii=False).encode("
 
 # frames_content = json.load(open("data_clip1.json", "r"))
 frames_content = json.load(open("data.json", "r"))
-fps = 60
+fps = 13
 
 sleep_time = 1 / fps
 version = 1.6
@@ -62,6 +68,7 @@ for fc in frames_content:
     # print(fc)
     # socket_conn.send_json(fc)
     print(type(fc))
+    fc['rig'] = 'MetaHuman' # override to metahuman
     fc_right_json = json.dumps(fc, ensure_ascii=False)
     socket_conn.send_json_encoded(fc_right_json.encode("utf-8"))
     logger.info(f"Start sending frames of version {version} @{fps}fps ...")

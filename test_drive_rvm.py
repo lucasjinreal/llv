@@ -8,7 +8,7 @@ import socket
 import json
 from pprint import pprint
 
-from llv.kokoframedata import KokoProps, KokoSuiteData, Pos, RotationQuat
+from llv.kokoframedata import KokoProps, KokoPersonData, Pos, RotationQuat
 from llv.socketconn import SocketConn
 import time
 from alfred import logger
@@ -60,7 +60,7 @@ socket_conn.send_json_encoded(json.dumps(handshake, ensure_ascii=False).encode("
 
 # frames_content = json.load(open("data_clip1.json", "r"))
 frames_content = json.load(open(sys.argv[1], "r"))
-fps = 15
+fps = 10
 
 sleep_time = 1 / fps
 version = 1.6
