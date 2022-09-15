@@ -86,6 +86,7 @@ while True:
         # print(fc)
         # socket_conn.send_json(fc)
         print(type(fc))
+        print(fc['scene']['actors'][0]['body']['rightFoot'])
 
         fc['version'] = version
 
